@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mutSkills - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            color: #2d2d2d;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #8b4513;
+            text-decoration: none;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 32px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #f5f5f5;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #8b4513;
+            background: white;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .icon-btn:hover {
+            color: #8b4513;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b4513, #c364c5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 88px;
+        }
+
+        .profile-section {
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b4513, #c364c5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 12px;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .profile-title {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .profile-stats {
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #8b4513;
+        }
+
+        /* Feed */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        /* Create Post */
+        .create-post-header {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .create-post-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b4513, #c364c5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .create-post-input {
+            flex: 1;
+        }
+
+        .create-post-input textarea {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .create-post-input textarea:focus {
+            outline: none;
+            border-color: #8b4513;
+        }
+
+        .create-post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .post-options {
+            display: flex;
+            gap: 16px;
+        }
+
+        .post-option-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .post-option-btn:hover {
+            color: #8b4513;
+        }
+
+        .post-btn {
+            background: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .post-btn:hover {
+            background: #6d3410;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .post-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .post-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #00bcd4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .post-info {
+            flex: 1;
+        }
+
+        .post-author {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .post-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .post-menu {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .post-content {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .post-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .action-btn.active {
+            color: #8b4513;
+        }
+
+        /* Right Sidebar */
+        .suggestions {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 88px;
+        }
+
+        .suggestions-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .suggestion-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .suggestion-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b9d, #c364c5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .suggestion-title {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .follow-btn {
+            background: none;
+            border: 1px solid #8b4513;
+            color: #8b4513;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .follow-btn:hover {
+            background: #8b4513;
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar,
+            .suggestions {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">mutSkills</a>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for skills, people, or posts...">
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn">🏠</button>
+                <button class="icon-btn">👥</button>
+                <button class="icon-btn">💼</button>
+                <button class="icon-btn">💬</button>
+                <button class="icon-btn">🔔</button>
+                <div class="user-avatar">JD</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="profile-pic">JD</div>
+                <div class="profile-name">John Doe</div>
+                <div class="profile-title">Full Stack Developer</div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Connections</span>
+                    <span class="stat-value">432</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Following</span>
+                    <span class="stat-value">156</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Followers</span>
+                    <span class="stat-value">892</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Feed -->
+        <main class="feed">
+            <!-- Create Post -->
+            <div class="card">
+                <div class="create-post-header">
+                    <div class="create-post-avatar">JD</div>
+                    <div class="create-post-input">
+                        <textarea id="postContent" placeholder="Share your thoughts, skills, or achievements..."></textarea>
+                    </div>
+                </div>
+                <div class="create-post-actions">
+                    <div class="post-options">
+                        <button class="post-option-btn" title="Add image">📷</button>
+                        <button class="post-option-btn" title="Add video">🎥</button>
+                        <button class="post-option-btn" title="Add document">📄</button>
+                        <button class="post-option-btn" title="Add poll">📊</button>
+                    </div>
+                    <button class="post-btn" onclick="createPost()">Post</button>
+                </div>
+            </div>
+
+            <!-- Posts -->
+            <div id="postsContainer">
+                <!-- Post 1 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar" style="background: linear-gradient(135deg, #ff6b9d, #c364c5);">SM</div>
+                        <div class="post-info">
+                            <div class="post-author">Sarah Mitchell</div>
+                            <div class="post-meta">UX Designer • 2 hours ago</div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        Just completed my certification in Advanced UI/UX Design! 🎉 Excited to apply these new skills to upcoming projects. The journey of continuous learning never stops!
+                    </div>
+                    <div class="post-stats">
+                        <span>248 likes</span>
+                        <span>32 comments • 15 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="toggleLike(this)">
+                            <span>👍</span> Like
+                        </button>
+                        <button class="action-btn">
+                            <span>💬</span> Comment
+                        </button>
+                        <button class="action-btn">
+                            <span>↗️</span> Share
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post 2 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">MJ</div>
+                        <div class="post-info">
+                            <div class="post-author">Michael Johnson</div>
+                            <div class="post-meta">Software Engineer • 5 hours ago</div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        Tips for junior developers:<br><br>
+                        1. Don't be afraid to ask questions<br>
+                        2. Code every day, even if it's just 30 minutes<br>
+                        3. Build projects that solve real problems<br>
+                        4. Engage with the developer community<br>
+                        5. Learn in public - share your journey!<br><br>
+                        What would you add to this list?
+                    </div>
+                    <div class="post-stats">
+                        <span>456 likes</span>
+                        <span>87 comments • 42 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="toggleLike(this)">
+                            <span>👍</span> Like
+                        </button>
+                        <button class="action-btn">
+                            <span>💬</span> Comment
+                        </button>
+                        <button class="action-btn">
+                            <span>↗️</span> Share
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post 3 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">EC</div>
+                        <div class="post-info">
+                            <div class="post-author">Emily Chen</div>
+                            <div class="post-meta">Digital Marketing Specialist • 1 day ago</div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        Thrilled to announce that I'll be speaking at the Digital Marketing Summit 2025! 🎤 Topic: "The Future of AI in Content Marketing"<br><br>
+                        If you're attending, let's connect! Would love to meet fellow marketing professionals and exchange ideas.
+                    </div>
+                    <div class="post-stats">
+                        <span>312 likes</span>
+                        <span>45 comments • 28 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="toggleLike(this)">
+                            <span>👍</span> Like
+                        </button>
+                        <button class="action-btn">
+                            <span>💬</span> Comment
+                        </button>
+                        <button class="action-btn">
+                            <span>↗️</span> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="suggestions">
+            <div class="suggestions-title">People to Follow</div>
+            <div class="suggestion-item">
+                <div class="suggestion-avatar">AB</div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">Alex Brown</div>
+                    <div class="suggestion-title">Data Scientist</div>
+                </div>
+                <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+            </div>
+            <div class="suggestion-item">
+                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #fa709a, #fee140);">LP</div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">Lisa Park</div>
+                    <div class="suggestion-title">Product Manager</div>
+                </div>
+                <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+            </div>
+            <div class="suggestion-item">
+                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #30cfd0, #330867);">DW</div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">David Wilson</div>
+                    <div class="suggestion-title">Graphic Designer</div>
+                </div>
+                <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+            </div>
+            <div class="suggestion-item">
+                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">NT</div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">Nina Taylor</div>
+                    <div class="suggestion-title">HR Consultant</div>
+                </div>
+                <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        function createPost() {
+            const content = document.getElementById('postContent').value.trim();
+            
+            if (!content) {
+                alert('Please write something to post!');
+                return;
+            }
+
+            const postsContainer = document.getElementById('postsContainer');
+            const newPost = document.createElement('div');
+            newPost.className = 'post-card';
+            newPost.innerHTML = `
+                <div class="post-header">
+                    <div class="post-avatar" style="background: linear-gradient(135deg, #8b4513, #c364c5);">JD</div>
+                    <div class="post-info">
+                        <div class="post-author">John Doe</div>
+                        <div class="post-meta">Full Stack Developer • Just now</div>
+                    </div>
+                    <button class="post-menu">⋯</button>
+                </div>
+                <div class="post-content">${content}</div>
+                <div class="post-stats">
+                    <span>0 likes</span>
+                    <span>0 comments • 0 shares</span>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn" onclick="toggleLike(this)">
+                        <span>👍</span> Like
+                    </button>
+                    <button class="action-btn">
+                        <span>💬</span> Comment
+                    </button>
+                    <button class="action-btn">
+                        <span>↗️</span> Share
+                    </button>
+                </div>
+            `;
+
+            postsContainer.insertBefore(newPost, postsContainer.firstChild);
+            document.getElementById('postContent').value = '';
+        }
+
+        function toggleLike(btn) {
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) {
+                btn.style.color = '#8b4513';
+            } else {
+                btn.style.color = '#666';
+            }
+        }
+
+        function toggleFollow(btn) {
+            if (btn.textContent === 'Follow') {
+                btn.textContent = 'Following';
+                btn.style.background = '#8b4513';
+                btn.style.color = 'white';
+            } else {
+                btn.textContent = 'Follow';
+                btn.style.background = 'none';
+                btn.style.color = '#8b4513';
+            }
+        }
+    </script>
+</body>
+</html>
