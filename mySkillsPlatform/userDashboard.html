@@ -41,7 +41,7 @@
             font-family: 'Playfair Display', serif;
             font-size: 28px;
             font-weight: 700;
-            color: #8b4513;
+            color: #22c55e;
             text-decoration: none;
         }
 
@@ -62,7 +62,7 @@
 
         .search-bar input:focus {
             outline: none;
-            border-color: #8b4513;
+            border-color: #22c55e;
             background: white;
         }
 
@@ -83,14 +83,14 @@
         }
 
         .icon-btn:hover {
-            color: #8b4513;
+            color: #22c55e;
         }
 
         .user-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #8b4513, #c364c5);
+            background: linear-gradient(135deg, #22c55e, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -129,7 +129,7 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #8b4513, #c364c5);
+            background: linear-gradient(135deg, #22c55e, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -167,7 +167,7 @@
 
         .stat-value {
             font-weight: 600;
-            color: #8b4513;
+            color: #22c55e;
         }
 
         /* Feed */
@@ -194,7 +194,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #8b4513, #c364c5);
+            background: linear-gradient(135deg, #22c55e, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -219,7 +219,7 @@
 
         .create-post-input textarea:focus {
             outline: none;
-            border-color: #8b4513;
+            border-color: #22c55e;
         }
 
         .create-post-actions {
@@ -245,11 +245,11 @@
         }
 
         .post-option-btn:hover {
-            color: #8b4513;
+            color: #22c55e;
         }
 
         .post-btn {
-            background: #8b4513;
+            background: #22c55e;
             color: white;
             border: none;
             padding: 10px 24px;
@@ -260,7 +260,7 @@
         }
 
         .post-btn:hover {
-            background: #6d3410;
+            background: #16a34a;
         }
 
         /* Post Card */
@@ -280,7 +280,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #00bcd4);
+            background: linear-gradient(135deg, #34d399, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -358,7 +358,7 @@
         }
 
         .action-btn.active {
-            color: #8b4513;
+            color: #22c55e;
         }
 
         /* Right Sidebar */
@@ -387,7 +387,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #ff6b9d, #c364c5);
+            background: linear-gradient(135deg, #10b981, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -411,8 +411,8 @@
 
         .follow-btn {
             background: none;
-            border: 1px solid #8b4513;
-            color: #8b4513;
+            border: 1px solid #22c55e;
+            color: #22c55e;
             padding: 6px 16px;
             border-radius: 16px;
             font-size: 13px;
@@ -422,7 +422,7 @@
         }
 
         .follow-btn:hover {
-            background: #8b4513;
+            background: #22c55e;
             color: white;
         }
 
@@ -458,7 +458,7 @@
                 <button class="icon-btn">💼</button>
                 <button class="icon-btn">💬</button>
                 <button class="icon-btn">🔔</button>
-                <div class="user-avatar">JD</div>
+                <div class="user-avatar" id="headerAvatar">JD</div>
             </div>
         </div>
     </header>
@@ -468,9 +468,9 @@
         <!-- Left Sidebar -->
         <aside class="sidebar">
             <div class="profile-section">
-                <div class="profile-pic">JD</div>
-                <div class="profile-name">John Doe</div>
-                <div class="profile-title">Full Stack Developer</div>
+                <div class="profile-pic" id="sidebarAvatar">JD</div>
+                <div class="profile-name" id="profileName">John Doe</div>
+                <div class="profile-title" id="profileTitle">Full Stack Developer</div>
             </div>
             <div class="profile-stats">
                 <div class="stat-item">
@@ -486,6 +486,31 @@
                     <span class="stat-value">892</span>
                 </div>
             </div>
+
+            <div style="margin-top:18px; text-align:center;">
+                <button id="logoutBtn" class="follow-btn" style="border-color:#c0392b;color:#c0392b;" onclick="logout()">Logout</button>
+            </div>
+
+            <script>
+             function logout() {
+                if (!confirm('Are you sure you want to log out?')) return;
+
+                const setCookie = (name) => {
+                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + location.hostname;
+                };
+
+                setCookie('justLoggedOut');
+                document.cookie = 'justLoggedOut=true;path=/;max-age=60';
+
+                document.cookie.split(';').forEach(function(c) {
+                    var name = c.trim().split('=')[0];
+                    setCookie(name);
+                });
+
+                window.location.href = 'login.html';
+            }
+            </script>
         </aside>
 
         <!-- Feed -->
@@ -493,7 +518,7 @@
             <!-- Create Post -->
             <div class="card">
                 <div class="create-post-header">
-                    <div class="create-post-avatar">JD</div>
+                    <div class="create-post-avatar" id="composerAvatar">JD</div>
                     <div class="create-post-input">
                         <textarea id="postContent" placeholder="Share your thoughts, skills, or achievements..."></textarea>
                     </div>
@@ -514,7 +539,7 @@
                 <!-- Post 1 -->
                 <div class="post-card">
                     <div class="post-header">
-                        <div class="post-avatar" style="background: linear-gradient(135deg, #ff6b9d, #c364c5);">SM</div>
+                        <div class="post-avatar" style="background: linear-gradient(135deg, #6ee7b7, #059669);">SM</div>
                         <div class="post-info">
                             <div class="post-author">Sarah Mitchell</div>
                             <div class="post-meta">UX Designer • 2 hours ago</div>
@@ -544,7 +569,7 @@
                 <!-- Post 2 -->
                 <div class="post-card">
                     <div class="post-header">
-                        <div class="post-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">MJ</div>
+                        <div class="post-avatar" style="background: linear-gradient(135deg, #34d399, #047857);">MJ</div>
                         <div class="post-info">
                             <div class="post-author">Michael Johnson</div>
                             <div class="post-meta">Software Engineer • 5 hours ago</div>
@@ -580,7 +605,7 @@
                 <!-- Post 3 -->
                 <div class="post-card">
                     <div class="post-header">
-                        <div class="post-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">EC</div>
+                        <div class="post-avatar" style="background: linear-gradient(135deg, #10b981, #065f46);">EC</div>
                         <div class="post-info">
                             <div class="post-author">Emily Chen</div>
                             <div class="post-meta">Digital Marketing Specialist • 1 day ago</div>
@@ -622,7 +647,7 @@
                 <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
             </div>
             <div class="suggestion-item">
-                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #fa709a, #fee140);">LP</div>
+                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #6ee7b7, #059669);">LP</div>
                 <div class="suggestion-info">
                     <div class="suggestion-name">Lisa Park</div>
                     <div class="suggestion-title">Product Manager</div>
@@ -630,7 +655,7 @@
                 <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
             </div>
             <div class="suggestion-item">
-                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #30cfd0, #330867);">DW</div>
+                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #34d399, #047857);">DW</div>
                 <div class="suggestion-info">
                     <div class="suggestion-name">David Wilson</div>
                     <div class="suggestion-title">Graphic Designer</div>
@@ -638,7 +663,7 @@
                 <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
             </div>
             <div class="suggestion-item">
-                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">NT</div>
+                <div class="suggestion-avatar" style="background: linear-gradient(135deg, #a7f3d0, #10b981);">NT</div>
                 <div class="suggestion-info">
                     <div class="suggestion-name">Nina Taylor</div>
                     <div class="suggestion-title">HR Consultant</div>
@@ -649,6 +674,67 @@
     </div>
 
     <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function getInitials(firstName, lastName, email) {
+            const a = (firstName || '').trim()[0];
+            const b = (lastName || '').trim()[0];
+            if (a || b) return `${a || ''}${b || ''}`.toUpperCase();
+            if (email) return email.slice(0, 2).toUpperCase();
+            return 'U';
+        }
+
+        async function loadProfile() {
+            const token = getCookie('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    credentials: 'include'
+                });
+
+                if (!res.ok) throw new Error('Unauthorized');
+                const data = await res.json();
+                if (!data.success || !data.user) throw new Error('Invalid response');
+
+                const user = data.user;
+                const firstName = user.first_name || user.firstName;
+                const lastName = user.last_name || user.lastName;
+                const fullName = [firstName, lastName].filter(Boolean).join(' ') || user.email;
+                const title = user.title || 'Add your title';
+                const initials = getInitials(firstName, lastName, user.email);
+
+                const headerAvatar = document.getElementById('headerAvatar');
+                const sidebarAvatar = document.getElementById('sidebarAvatar');
+                const composerAvatar = document.getElementById('composerAvatar');
+                const profileName = document.getElementById('profileName');
+                const profileTitle = document.getElementById('profileTitle');
+
+                if (headerAvatar) headerAvatar.textContent = initials;
+                if (sidebarAvatar) sidebarAvatar.textContent = initials;
+                if (composerAvatar) composerAvatar.textContent = initials;
+                if (profileName) profileName.textContent = fullName;
+                if (profileTitle) profileTitle.textContent = title;
+
+            } catch (e) {
+                ['token', 'user', 'loginTime'].forEach(key => {
+                    document.cookie = `${key}=; path=/; max-age=0`;
+                });
+                window.location.href = 'login.html';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadProfile);
         function createPost() {
             const content = document.getElementById('postContent').value.trim();
             
@@ -662,7 +748,7 @@
             newPost.className = 'post-card';
             newPost.innerHTML = `
                 <div class="post-header">
-                    <div class="post-avatar" style="background: linear-gradient(135deg, #8b4513, #c364c5);">JD</div>
+                    <div class="post-avatar" style="background: linear-gradient(135deg, #22c55e, #059669);">JD</div>
                     <div class="post-info">
                         <div class="post-author">John Doe</div>
                         <div class="post-meta">Full Stack Developer • Just now</div>
@@ -694,7 +780,7 @@
         function toggleLike(btn) {
             btn.classList.toggle('active');
             if (btn.classList.contains('active')) {
-                btn.style.color = '#8b4513';
+                btn.style.color = '#22c55e';
             } else {
                 btn.style.color = '#666';
             }
@@ -703,12 +789,12 @@
         function toggleFollow(btn) {
             if (btn.textContent === 'Follow') {
                 btn.textContent = 'Following';
-                btn.style.background = '#8b4513';
+                btn.style.background = '#22c55e';
                 btn.style.color = 'white';
             } else {
                 btn.textContent = 'Follow';
                 btn.style.background = 'none';
-                btn.style.color = '#8b4513';
+                btn.style.color = '#22c55e';
             }
         }
     </script>
