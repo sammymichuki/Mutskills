@@ -1,0 +1,45 @@
+# Environment files
+.env
+
+# Uploaded files
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+error_log
+debug.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Composer (if using)
+/vendor/
+composer.lock
+
+# Node modules (if using)
+node_modules/
+package-lock.json
+
+# Cache
+cache/
+*.cache
