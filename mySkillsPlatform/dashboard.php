@@ -68,6 +68,18 @@ try {
     ");
     $stmt->execute([':current_user_id' => $_SESSION['user_id']]);
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch suggested users to follow/connect
+    $stmtSug = $pdo->prepare("
+        SELECT u.id, u.first_name, u.last_name, u.email, u.title,
+               (SELECT COUNT(*) FROM followers WHERE user_id = u.id AND follower_id = :me) as is_following
+        FROM users u
+        WHERE u.id <> :me2
+        ORDER BY u.id DESC
+        LIMIT 5
+    ");
+    $stmtSug->execute([':me' => $_SESSION['user_id'], ':me2' => $_SESSION['user_id']]);
+    $suggestedUsers = $stmtSug->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
@@ -638,16 +650,18 @@ function timeAgo($datetime) {
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <a href="#" class="logo">mutSkills</a>
+            <a href="dashboard.php" class="logo">mutSkills</a>
             <div class="search-bar">
                 <input id="globalSearch" type="text" placeholder="Search skills and press Enter...">
             </div>
             <div class="header-actions">
+                <a href="index.php" class="icon-btn" style="text-decoration:none;" title="Landing Page">🏠 Home</a>
                 <button class="icon-btn" title="Add Skill" onclick="openAddSkillModal()">➕ Add Skill</button>
                 <button class="icon-btn" title="View Skills" onclick="focusSkillsFeed()">🧩 View Skills</button>
                 <button class="icon-btn" title="Messages" onclick="openMessagesPanel()">💬 Messages</button>
-                <div class="header-profile" title="Profile">
+                <div class="header-profile" title="<?php echo htmlspecialchars($fullName); ?>">
                     <div class="user-avatar"><?php echo htmlspecialchars($initials); ?></div>
+                    <span class="name" style="display:none; @media(min-width:768px){display:inline;}"><?php echo htmlspecialchars($firstName ?: $fullName); ?></span>
                 </div>
             </div>
         </div>
@@ -664,18 +678,18 @@ function timeAgo($datetime) {
             </div>
             <div class="profile-stats">
                 <div class="stat-item">
-                        <span class="stat-label">Connections</span>
-                        <span class="stat-value">342</span>
-                 </div>
-                 <div class="stat-item">
-                        <span class="stat-label">Following</span>
-                        <span class="stat-value">128</span>
-                 </div>
-                 <div class="stat-item">
-                        <span class="stat-label">Followers</span>
-                        <span class="stat-value">1,247</span>
-                 </div>
+                    <span class="stat-label">Connections</span>
+                    <span class="stat-value" id="statsConnections"><?php echo number_format($stats['connections'] ?? 0); ?></span>
                 </div>
+                <div class="stat-item">
+                    <span class="stat-label">Following</span>
+                    <span class="stat-value" id="statsFollowing"><?php echo number_format($stats['following'] ?? 0); ?></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Followers</span>
+                    <span class="stat-value" id="statsFollowers"><?php echo number_format($stats['followers'] ?? 0); ?></span>
+                </div>
+            </div>
 
             <div style="margin-top:18px; text-align:center;">
                 <form method="POST" action="logout.php" onsubmit="return confirm('Are you sure you want to log out?');">
@@ -697,11 +711,10 @@ function timeAgo($datetime) {
                     </div>
                     <div class="create-post-actions">
                         <div class="post-options">
-                            <label class="post-option-btn" title="Add image" style="cursor:pointer;">
-                                📷
-                                <input type="file" name="image" accept="image/*" style="display:none;">
+                            <label class="post-option-btn" title="Add image" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-size:14px;">
+                                📷 <span id="postImageBadge" style="font-size:13px; color:#666;">Attach Photo</span>
+                                <input type="file" id="postImageInput" name="image" accept="image/*" style="display:none;" onchange="document.getElementById('postImageBadge').textContent = this.files.length ? '✓ ' + this.files[0].name.substring(0, 15) : 'Attach Photo';">
                             </label>
-                            <button type="button" class="post-option-btn" title="Add video">🎥</button>
                         </div>
                         <button type="submit" class="post-btn">Post</button>
                     </div>
@@ -737,7 +750,7 @@ function timeAgo($datetime) {
                         $timeAgo = timeAgo($post['created_at']);
                         $isLiked = $post['user_liked'] > 0;
                     ?>
-                    <div class="post-card">
+                    <div class="post-card" data-post-id="<?php echo $post['id']; ?>">
                         <div class="post-header">
                             <div class="post-avatar"><?php echo htmlspecialchars($postUserInitials); ?></div>
                             <div class="post-info">
@@ -763,14 +776,14 @@ function timeAgo($datetime) {
                             <button class="action-btn" onclick="toggleComments(this)">
                                 <span>💬</span> Comment
                             </button>
-                            <button class="action-btn">
-                                <span>↗️</span> Share
+                            <button class="action-btn" onclick="openMessagesPanel()">
+                                <span>↗️</span> Connect
                             </button>
                         </div>
                         <div class="comments" style="margin-top:12px; display:none;">
                             <div class="comments-list" style="margin-bottom:8px;"></div>
                             <div style="display:flex; gap:8px;">
-                                <input type="text" class="comment-input" placeholder="Write a comment..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;" />
+                                <input type="text" class="comment-input" placeholder="Write a comment..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px;" onkeydown="if(event.key==='Enter'){submitComment(this.nextElementSibling, <?php echo $post['id']; ?>);}" />
                                 <button class="post-btn" onclick="submitComment(this, <?php echo $post['id']; ?>)">Post</button>
                             </div>
                         </div>
@@ -780,8 +793,33 @@ function timeAgo($datetime) {
             </div>
         </main>
 
-        <!-- Right Sidebar (minimal content) -->
+        <!-- Right Sidebar -->
         <aside class="suggestions">
+            <div class="suggestions-title">People to Connect</div>
+            <div class="suggestions-users" style="margin-bottom:20px;">
+                <?php if (empty($suggestedUsers)): ?>
+                    <p style="color:#888; font-size:13px;">No suggestions yet</p>
+                <?php else: ?>
+                    <?php foreach ($suggestedUsers as $sug): 
+                        $sugInitials = getUserInitials($sug['first_name'], $sug['last_name'], $sug['email']);
+                        $sugName = trim($sug['first_name'] . ' ' . $sug['last_name']);
+                        if (empty($sugName)) $sugName = $sug['email'];
+                        $isFollowing = ($sug['is_following'] > 0);
+                    ?>
+                    <div class="suggestion-item">
+                        <div class="suggestion-avatar"><?php echo htmlspecialchars($sugInitials); ?></div>
+                        <div class="suggestion-info">
+                            <div class="suggestion-name"><?php echo htmlspecialchars($sugName); ?></div>
+                            <div class="suggestion-title"><?php echo htmlspecialchars($sug['title'] ?? 'Student'); ?></div>
+                        </div>
+                        <button class="follow-btn" onclick="toggleFollow(this, <?php echo $sug['id']; ?>)" style="<?php echo $isFollowing ? 'background:#22c55e; color:white;' : ''; ?>">
+                            <?php echo $isFollowing ? 'Following' : 'Follow'; ?>
+                        </button>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
             <div class="suggestions-title">Latest Skills</div>
             <div id="allSkillsRight" class="skills-list"></div>
         </aside>
@@ -854,21 +892,26 @@ function timeAgo($datetime) {
             const card = btn.closest('.post-card');
             const box = card.querySelector('.comments');
             const list = card.querySelector('.comments-list');
+            const postId = card.dataset.postId;
             box.style.display = box.style.display === 'none' ? 'block' : 'none';
             if (box.style.display === 'block' && list.childElementCount === 0) {
-                const postId = card.querySelector('[onclick^="toggleLike"]').getAttribute('onclick').match(/,(\s*)(\d+)/)[2];
-                fetch('get_comments.php?post_id=' + postId)
+                fetch('get_comments.php?post_id=' + encodeURIComponent(postId))
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
                             list.innerHTML = '';
+                            if (!data.comments || data.comments.length === 0) {
+                                list.innerHTML = '<div style="color:#888; font-size:13px; padding:6px 0;">No comments yet. Be the first to comment!</div>';
+                                return;
+                            }
                             data.comments.forEach(c => {
                                 const name = (c.first_name || '') + ' ' + (c.last_name || '');
-                                const safeName = name.trim() || (c.email || '');
+                                const safeName = name.trim() || (c.email || 'User');
                                 const div = document.createElement('div');
                                 div.style.padding = '6px 0';
                                 div.style.borderBottom = '1px solid #f0f0f0';
-                                div.textContent = (safeName + ': ' + c.content);
+                                div.style.fontSize = '13px';
+                                div.innerHTML = '<strong>' + escapeHtml(safeName) + ':</strong> ' + escapeHtml(c.content);
                                 list.appendChild(div);
                             });
                         }
@@ -889,18 +932,21 @@ function timeAgo($datetime) {
             }).then(r => r.json()).then(data => {
                 btn.disabled = false;
                 if (data.success) {
-                    // append new comment
                     const list = card.querySelector('.comments-list');
+                    if (list.textContent.includes('No comments yet')) {
+                        list.innerHTML = '';
+                    }
                     const me = document.createElement('div');
                     me.style.padding = '6px 0';
                     me.style.borderBottom = '1px solid #f0f0f0';
-                    me.textContent = ('You: ' + content);
+                    me.style.fontSize = '13px';
+                    me.innerHTML = '<strong>You:</strong> ' + escapeHtml(content);
                     list.appendChild(me);
                     input.value = '';
                     // update count in stats
                     const statsSpan = card.querySelector('.post-stats span:nth-child(2)');
                     if (statsSpan) {
-                        const likesText = statsSpan.textContent; // "X comments • Y shares"
+                        const likesText = statsSpan.textContent;
                         const parts = likesText.split(' • ');
                         parts[0] = data.comments + ' comments';
                         statsSpan.textContent = parts.join(' • ');
@@ -910,16 +956,40 @@ function timeAgo($datetime) {
                 }
             }).catch(() => { btn.disabled = false; });
         }
-        function toggleFollow(btn) {
-            if (btn.textContent === 'Follow') {
-                btn.textContent = 'Following';
-                btn.style.background = '#22c55e';
-                btn.style.color = 'white';
-            } else {
-                btn.textContent = 'Follow';
-                btn.style.background = 'none';
-                btn.style.color = '#22c55e';
-            }
+
+        function toggleFollow(btn, userId) {
+            if (!userId) return;
+            btn.disabled = true;
+            fetch('toggle_follow.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'user_id=' + encodeURIComponent(userId)
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.success) {
+                    if (data.following) {
+                        btn.textContent = 'Following';
+                        btn.style.background = '#22c55e';
+                        btn.style.color = 'white';
+                    } else {
+                        btn.textContent = 'Follow';
+                        btn.style.background = 'none';
+                        btn.style.color = '#22c55e';
+                    }
+                    const followingEl = document.getElementById('statsFollowing');
+                    if (followingEl && typeof data.my_following !== 'undefined') {
+                        followingEl.textContent = data.my_following;
+                    }
+                } else {
+                    alert(data.message || 'Unable to update follow status');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                console.error('Follow error:', err);
+            });
         }
 
         // Skills
@@ -940,15 +1010,18 @@ function timeAgo($datetime) {
                     document.getElementById('skillLevel').value = '';
                     document.getElementById('skillDescription').value = '';
                     document.getElementById('skillImage').value = '';
-                    document.getElementById('skillImageLabel').textContent = '';
-                    if (document.getElementById('skillsViewBackdrop').style.display === 'flex') {
-                        loadMySkills();
-                        loadAllSkills();
-                    }
+                    const label = document.getElementById('skillImageLabel');
+                    if (label) label.textContent = '📷 Attach Image';
+                    loadFeedSkills();
+                    loadAllSkills();
+                    loadMySkills();
                     closeAddSkillModal();
                 } else {
                     alert(data.message || 'Failed to add skill');
                 }
+            }).catch(err => {
+                console.error('Skill submit error:', err);
+                alert('Error saving skill');
             });
         }
 
@@ -1059,11 +1132,10 @@ function timeAgo($datetime) {
 
         // Messaging
         function openMessageModal(userId, userName) {
-            const b = document.getElementById('messageBackdrop');
-            document.getElementById('messageToId').value = userId || '';
-            document.getElementById('messageToName').value = userName || '';
-            document.getElementById('messageContent').value = '';
-            b.style.display = 'flex';
+            openMessagesPanel();
+            if (userId) {
+                openChat(userId, userName || 'User');
+            }
         }
         function closeMessageModal() { document.getElementById('messageBackdrop').style.display = 'none'; }
         function sendMessage() {
@@ -1195,6 +1267,30 @@ function timeAgo($datetime) {
                     submitSkill();
                 });
             }
+
+            const skillImg = document.getElementById('skillImage');
+            if (skillImg) {
+                skillImg.addEventListener('change', function() {
+                    const label = document.getElementById('skillImageLabel');
+                    if (this.files && this.files.length > 0) {
+                        label.textContent = '✓ ' + this.files[0].name;
+                    } else {
+                        label.textContent = '📷 Attach Image';
+                    }
+                });
+            }
+
+            // Check URL search parameters (e.g. from landing page)
+            const params = new URLSearchParams(window.location.search);
+            const query = params.get('q') || params.get('category');
+            if (query) {
+                const searchEl = document.getElementById('feedSkillsSearch');
+                if (searchEl) {
+                    searchEl.value = query;
+                    loadFeedSkills();
+                    focusSkillsFeed();
+                }
+            }
         });
 
         loadMySkills();
@@ -1269,45 +1365,6 @@ function timeAgo($datetime) {
     </div>
 </div>
 
-<script>
-// Handle file input change
-document.getElementById('skillImage').addEventListener('change', function(e) {
-    const label = document.getElementById('skillImageLabel');
-    if (this.files && this.files.length > 0) {
-        label.textContent = '✓ ' + this.files[0].name;
-    } else {
-        label.textContent = '📷 Attach Image';
-    }
-});
-
-// Handle form submission
-document.getElementById('addSkillForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData();
-    formData.append('name', document.getElementById('skillName').value);
-    formData.append('level', document.getElementById('skillLevel').value);
-    formData.append('description', document.getElementById('skillDescription').value);
-    
-    const imageFile = document.getElementById('skillImage').files[0];
-    if (imageFile) {
-        formData.append('image', imageFile);
-    }
-    
-    // Send to server
-    fetch('save_skill.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        closeAddSkillModal();
-        // Refresh skills list or add to page
-    })
-    .catch(error => console.error('Error:', error));
-});
-</script>
 
     <!-- Messages Panel Modal -->
     <div id="messagesBackdrop" class="modal-backdrop" onclick="if(event.target===this) closeMessagesPanel();" style="display:none;">

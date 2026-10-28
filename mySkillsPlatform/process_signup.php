@@ -87,16 +87,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // If there are errors, redirect back to signup page
     if (!empty($errors)) {
-        $_SESSION['error'] = implode("<br>", $errors);
+        $_SESSION['signup_errors'] = $errors;
+        $_SESSION['error'] = implode("\n", $errors);
         header("Location: signUp.php");
         exit();
     }
     
     // Hash the password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    
-    // Combine first and last name
-    $full_name = $firstname . ' ' . $lastname;
     
     try {
         $pdo = getDBConnection();
@@ -109,19 +107,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ':password' => $hashed_password
         ]);
 
-        // Get the newly created user ID
-        $user_id = (int)$pdo->lastInsertId();
-
         // Clear form data from session
         unset($_SESSION['form_data']);
 
-        // Option: Do NOT auto-login; require explicit login for clarity
+        // Set registered email to pre-fill login form
+        $_SESSION['registered_email'] = $email;
         $_SESSION['success'] = "Account created successfully! Please sign in.";
         header("Location: login.php");
         exit();
     } catch (PDOException $e) {
         error_log('Signup insert failed: ' . $e->getMessage());
-        $_SESSION['error'] = "Something went wrong. Please try again.";
+        $_SESSION['error'] = "Something went wrong creating your account. Please try again.";
         header("Location: signUp.php");
         exit();
     }

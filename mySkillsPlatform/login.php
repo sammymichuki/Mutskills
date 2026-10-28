@@ -1,13 +1,26 @@
 <?php
 session_start();
 
+// If already logged in, redirect to dashboard
+if (isset($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
+    exit();
+}
+
 // Display error or success messages
 $error_message = isset($_SESSION['error']) ? $_SESSION['error'] : '';
 $success_message = isset($_SESSION['success']) ? $_SESSION['success'] : '';
+$prefilled_email = isset($_SESSION['registered_email']) ? $_SESSION['registered_email'] : '';
+
+// Check if user just logged out
+if (isset($_COOKIE['justLoggedOut']) && empty($success_message)) {
+    $success_message = "You have been logged out successfully.";
+}
 
 // Clear messages after displaying
 unset($_SESSION['error']);
 unset($_SESSION['success']);
+unset($_SESSION['registered_email']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -290,7 +303,7 @@ unset($_SESSION['success']);
                 <form id="loginForm" method="POST" action="process_login.php">
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" value="<?php echo htmlspecialchars($prefilled_email); ?>" required>
                     </div>
 
                     <div class="form-group">
@@ -311,7 +324,7 @@ unset($_SESSION['success']);
 
                     <button type="submit" class="sign-in-btn">Sign In</button>
 
-                    <button type="button" class="google-btn" onclick="window.location.href='google_login.php'">
+                    <button type="button" class="google-btn" onclick="alert('Google Sign-In is coming soon. Please use email and password to sign in.')">
                         <svg class="google-icon" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
